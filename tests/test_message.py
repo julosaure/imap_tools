@@ -19,6 +19,13 @@ class MessageTest(MailboxTestCase):
                 self.assertEqual(message.text, '')
                 self.assertEqual(message.html, '')
                 self.assertEqual(len(message.attachments), 0)
+            # message_parts
+            for message in mailbox.fetch(message_parts='(BODY.PEEK[HEADER.FIELDS (SUBJECT DATE)] UID)'):
+                for true_field in {'uid', 'subject', 'date', 'date_str', 'headers'}:
+                    self.assertTrue(bool(getattr(message, true_field)))
+                for false_field in {'from_', 'text', 'html', 'flags', 'to', 'cc', 'bcc', 'reply_to'}:
+                    self.assertFalse(bool(getattr(message, false_field)))
+                self.assertFalse(bool(len(message.attachments)))
             # types
             for message in mailbox.fetch():
                 self.assertIn(type(message.uid), (str, none_type))
